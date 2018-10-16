@@ -11,7 +11,7 @@
 # transmission port	51413		torrent communications port (will need port forward configured)
 
 # PLEX			32400		PLEX Media Server
-# Tautuli		8282		Tautulli Plex stats
+# Tautulli		8282		Tautulli Plex stats
 # AirSonic		4040		Music organizer/player
 
 # Jackett		9117		torrent tracker
