@@ -1,0 +1,20 @@
+# following are my cron jobs which automate some tasks for me
+# i found that Jackett crashs often so I have it restarting every 3 hours
+# PLEX is optimized and restarted daily
+
+
+# update blocklist first of the month at 0:00
+0 0 1 * * /data/bin/createp2plist.sh -c /data/media/tmp && chown nas:nas /data/media/tmp/list.p2p
+
+# clean /tmp every 2 hours
+0 */2 * * * /data/bin/cleantmp.sh
+
+# restart jackett every 3 hours
+0 */3 * * * /bin/docker restart jackett && logger "[DEBUG JACKETT] restarted"
+
+# fix perm every 4 hours
+0 */4 * * * /data/bin/fixperm.sh
+
+# optimize db & restart plex daily at 6AM
+0 6 * * * /data/bin/plexoptimize.sh && /bin/docker restart plex && logger "[DEBUG PLEX]DB Optimized and restarted"
+

@@ -1,0 +1,232 @@
+# my media server docker-compose file
+# this utilizes images provided by linuxserver.io
+# please make sure to look at the .env file and configure and adjust accordingly
+
+# following ports are used for various services you can access these services via http://IPOFYOURSERVER:PORT (add /web to the end for PLEX)
+
+# SERVICE		PORT		DESCRIPTION
+# qBittorrent webui	6767		torrent client
+# qBittorrent port	6881		torrent communications port (will need port forward configured)
+# transmission webui	9091		torrent client
+# transmission port	51413		torrent communications port (will need port forward configured)
+
+# PLEX			32400		PLEX Media Server
+# Tautuli		8282		Tautulli Plex stats
+# AirSonic		4040		Music organizer/player
+
+# Jackett		9117		torrent tracker
+# Radarr		7878		Movie database/tracker
+# Sonarr		8989		TV database/tracker
+# Headphones		8181		Music database/tracker
+# LazyLibrarian		5299		Book database/trackerA
+
+# Heimdall		80		Web portal to access all of the above
+# Watchtower		N/A		keeps watch and updates each container image as updates are published
+
+version: "2"
+
+services:
+  qbittorrent:
+    image: linuxserver/qbittorrent
+    container_name: qbittorrent
+    restart: always
+    ports:
+      - "${QBIT_CONNECTION_PORT}:${QBIT_CONNECTION_PORT}"
+      - "${QBIT_CONNECTION_PORT}:${QBIT_CONNECTION_PORT}/udp"
+      - "${QBIT_WEBUI_PORT}:${QBIT_WEBUI_PORT}"
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - QBIT_WEBUI_USER=${QBIT_WEBUI_USER}
+      - QBIT_WEBUI_PASS=${QBIT_WEBUI_PASS}
+      - WEBUI_PORT=${QBIT_WEBUI_PORT}
+      - QBIT_CONNECTION_PORT=${QBIT_CONNECTION_PORT}
+      - TZ=America/Chicago
+    volumes:
+      - ${CONFIG_DIR}/qbittorrent:/config
+      - ${DOWNLOAD_DIR}:/downloads
+      - ${MEDIA_DIR}:/media
+      - ${TMP_DIR}:/tmp
+
+  transmission:
+    image: linuxserver/transmission
+    container_name: transmission
+    restart: always
+    ports:
+      - "${TRANS_WEBUI_PORT}:${TRANS_WEBUI_PORT}"
+      - "${TRANS_CONNECTION_PORT}:${TRANS_CONNECTION_PORT}"
+      - "${TRANS_CONNECTION_PORT}:${TRANS_CONNECTION_PORT}/udp"
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TRANS_WEBUI_USER=${TRANS_WEBUI_USER}
+      - TRANS_WEBUI_PASS=${TRANS_WEBUI_PASS}
+      - TZ=America/Chicago
+    volumes:
+      - ${CONFIG_DIR}/transmission:/config
+      - ${DOWNLOAD_DIR}:/downloads
+      - ${MEDIA_DIR}:/media
+      - ${TMP_DIR}:/tmp
+
+  sonarr:
+    image: linuxserver/sonarr
+    container_name: sonarr
+    restart: always
+    ports:
+      - "8989:8989"
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=America/Chicago
+    volumes:
+      - ${CONFIG_DIR}/sonarr:/config
+      - ${DOWNLOAD_DIR}:/downloads/
+      - ${TV_DIR}:/media
+      - ${TMP_DIR}:/tmp
+
+  radarr:
+    image: linuxserver/radarr
+    container_name: radarr
+    restart: always
+    ports:
+      - "7878:7878"
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=America/Chicago
+    volumes:
+      - ${CONFIG_DIR}/radarr:/config
+      - ${DOWNLOAD_DIR}:/downloads
+      - ${MOVIES_DIR}:/media
+      - ${TMP_DIR}:/tmp
+
+  jackett:
+    image: linuxserver/jackett
+    container_name: jackett
+    restart: always
+    ports:
+      - "9117:9117"
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=America/Chicago
+      - JACKETT_KEY=9818
+    volumes:
+      - ${CONFIG_DIR}/jackett:/config
+      - ${CONFIG_DIR}/jackett/downloads:/downloads
+      - ${TMP_DIR}:/tmp
+
+  plex:
+    image: linuxserver/plex
+    container_name: plex
+    restart: always
+    ports:
+      - "32400:32400"
+      - "1900:1900"
+      - "3005:3005"
+      - "5353:5353"
+      - "8324:8324"
+      - "32410:32410"
+      - "32412:32412"
+      - "32413:32413"
+      - "32414:32414"
+      - "32469:32469"
+    network_mode: host
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=America/Chicago
+      - VERSION=latest
+    volumes:
+      - ${PLEX_DIR}:/config
+      - ${MEDIA_DIR}:/media
+      - ${TRANSCODE_DIR}:/transcode
+      - ${TMP_DIR}:/tmp
+    devices:
+      - "/dev/dri/card0:/dev/dri/card0"
+      - "/dev/dri/renderD128:/dev/dri/renderD128"
+
+  tautulli:
+    image: linuxserver/tautulli
+    container_name: tautulli
+    restart: always
+    ports:
+      - "8282:8181"
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=America/Chicago
+    volumes:
+      - ${CONFIG_DIR}/tautulli:/config
+      - "/data/plex/Library/Application Support/Plex Media Server/Logs:/logs:ro"
+
+  lazylibrarian:
+    image: linuxserver/lazylibrarian
+    container_name: lazylibrarian
+    restart: always
+    ports:
+      - "5299:5299"
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=America/Chicago
+    volumes:
+      - ${CONFIG_DIR}/lazylibrarian:/config
+      - ${DOWNLOAD_DIR}:/downloads
+      - ${BOOK_DIR}:/books
+      - ${TMP_DIR}:/tmp
+
+  headphones:
+    image: linuxserver/headphones
+    container_name: headphones
+    restart: always
+    ports:
+      - "8181:8181"
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=America/Chicago
+    volumes:
+      - ${CONFIG_DIR}/headphones:/config
+      - ${DOWNLOAD_DIR}:/downloads
+      - ${MUSIC_DIR}:/music
+      - ${TMP_DIR}:/tmp
+
+  airsonic:
+    image: linuxserver/airsonic
+    container_name: airsonic
+    restart: always
+    ports:
+      - "4040:4040"
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=America/Chicago
+    volumes:
+      - ${CONFIG_DIR}/airsonic:/config
+      - ${TMP_DIR}:/tmp
+      - ${MUSIC_DIR}:/music
+
+  heimdall:
+    image: linuxserver/heimdall
+    container_name: heimdall
+    restart: always
+    mem_limit: 4096m
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=America/Chicago
+    volumes:
+      - ${CONFIG_DIR}/heimdall:/config
+      - ${TMP_DIR}:/tmp
+
+  watchtower:
+    image: v2tec/watchtower
+    container_name: watchtower
+    restart: always
+    network_mode: host
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock

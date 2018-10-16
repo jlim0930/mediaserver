@@ -1,0 +1,46 @@
+# variables file for docker-compose
+
+# env file to describe the environment. 
+# I have my NAS mounted onto /data/media with subdirectories books/movies/tv and shared out those directories sometimes directly and other times at the /data /media level
+# also have /data and /data/downloads as separate partitions so that my / does not fill up.  Kept plex separate as well as my plex directory currently takes over 60GB
+
+
+# shared /tmp for inside the docker containers.  this makes it easier to transfer files back and forth between each container
+TMP_DIR=/data/tmpA
+
+# config directories to store all the configs for containers
+CONFIG_DIR=/data/config
+
+# plex directory.  for me this is a separate partition and is quiet large.
+PLEX_DIR=/data/plex
+
+# plex transcode directory.  I want to use memory to transcode my videos for faster speed
+TRANSCODE_DIR=/dev/shm
+
+# download directory also a separate partition
+DOWNLOAD_DIR=/data/downloads
+
+# root level media directory for all my media files
+MEDIA_DIR=/data/media
+TV_DIR=/data/media
+MOVIES_DIR=/data/media
+
+# these two were separated out a bit more to the specific level for headphones and lazylibrian
+BOOK_DIR=/data/media/books
+MUSIC_DIR=/data/media/musicA
+
+# qBittorrent configs
+QBIT_WEBUI_USER=admin
+QBIT_WEBUI_PASS=adminadmin
+QBIT_WEBUI_PORT=6767
+QBIT_CONNECTION_PORT=6881
+
+# transmission configs
+TRANS_WEBUI_USER=admin
+TRANS_WEBUI_PASS=adminadmin
+TRANS_WEBUI_PORT=9091
+TRANS_CONNECTION_PORT=51413
+
+# uid and gid that i want all of the above services to run in so that they can access all the files between each other.  this also matches my uid/gid from the nas
+PUID=1026
+PGID=100

@@ -1,0 +1,18 @@
+[Unit]
+Description=mediaserver Service
+After=network.service docker.service  
+Requires=docker.service
+
+[Service]
+Restart=always
+RestartSec=10
+TimeoutSec=300
+# PLEASE UPDATE the work directory to match your environment
+WorkingDirectory=/home/user/mediaserver
+ExecStartPre=/usr/bin/env docker-compose -p "mediaserver" -f "docker-compose.yml" pull
+ExecStart=/usr/bin/env docker-compose -p "mediaserver" -f "docker-compose.yml" up
+ExecStop=/usr/bin/env docker-compose -p "mediaserver" -f "docker-compose.yml" stop
+ExecStopPost=/usr/bin/env docker-compose -p "mediaserver" -f "docker-compose.yml" down
+
+[Install]
+WantedBy=docker.service
