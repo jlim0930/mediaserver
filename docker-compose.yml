@@ -21,6 +21,7 @@
 # LazyLibrarian		5299		Book database/trackerA
 
 # Heimdall		80		Web portal to access all of the above
+# Glances		61208		Eyes on your system via Web
 # Watchtower		N/A		keeps watch and updates each container image as updates are published
 
 version: "2"
@@ -222,6 +223,19 @@ services:
     volumes:
       - ${CONFIG_DIR}/heimdall:/config
       - ${TMP_DIR}:/tmp
+
+  glances:
+    image: nicolargo/glances
+    container_name: glances
+    restart: always
+    pid: host
+    environment:
+      - GLANCES_OPT=-w
+    ports:
+      - "61208:61208"
+      - "61209:61209"
+    volumes: 
+      - /var/run/docker.sock:/var/run/docker.sock:ro
 
   watchtower:
     image: v2tec/watchtower
